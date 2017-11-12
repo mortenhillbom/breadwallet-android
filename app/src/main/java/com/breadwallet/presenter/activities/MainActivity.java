@@ -3,6 +3,7 @@ package com.breadwallet.presenter.activities;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -23,11 +24,25 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.ViewFlipper;
+
+import android.nfc.NdefMessage;
+import android.nfc.NdefRecord;
+import android.nfc.NfcAdapter;
+import android.nfc.NfcEvent;
+import android.nfc.Tag;
+import android.nfc.tech.Ndef;
+import android.nfc.NfcManager;
+import android.os.Parcelable;
+import java.nio.charset.Charset;
+
+import android.app.Fragment;
 
 import com.breadwallet.R;
 import com.breadwallet.BreadWalletApp;
@@ -37,6 +52,7 @@ import com.breadwallet.presenter.entities.BlockEntity;
 import com.breadwallet.presenter.fragments.FragmentScanResult;
 import com.breadwallet.presenter.fragments.FragmentSettings;
 import com.breadwallet.presenter.fragments.FragmentWithdrawBch;
+import com.breadwallet.presenter.fragments.MainFragmentCashier;
 import com.breadwallet.tools.animation.BRAnimator;
 import com.breadwallet.tools.sqlite.SQLiteManager;
 import com.breadwallet.tools.sqlite.TransactionDataSource;
@@ -102,6 +118,7 @@ public class MainActivity extends FragmentActivity implements Observer {
     public RelativeLayout pageIndicator;
     private ImageView pageIndicatorLeft;
     private ImageView pageIndicatorRight;
+    private ImageView pageIndicatorCashier;
     private Map<String, Integer> burgerButtonMap;
     private Button burgerButton;
     public Button lockerButton;
@@ -127,6 +144,9 @@ public class MainActivity extends FragmentActivity implements Observer {
     public BubbleTextView sendBubble2;
     private ToastUpdater toastUpdater;
 
+    public static String billAmount = "100";
+    public static String walletAddress = "";
+
     public static boolean appInBackground = false;
 
     //loading the native library
@@ -134,6 +154,9 @@ public class MainActivity extends FragmentActivity implements Observer {
         System.loadLibrary("core");
 
     }
+
+    private NfcAdapter mNfcAdapter;
+    private PendingIntent mPendingIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -166,6 +189,13 @@ public class MainActivity extends FragmentActivity implements Observer {
         if (PLATFORM_ON)
             APIClient.getInstance(this).updatePlatform();
 
+
+        NfcManager nfcManager = (NfcManager) getSystemService(NFC_SERVICE);
+        mNfcAdapter = nfcManager.getDefaultAdapter();
+
+        mPendingIntent = PendingIntent.getActivity(this, 0, new Intent(this, getClass())
+                .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
+
     }
 
     @Override
@@ -194,6 +224,43 @@ public class MainActivity extends FragmentActivity implements Observer {
         super.onNewIntent(intent);
         setUrlHandler(intent);
 
+        Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+
+        Ndef ndefMessage = Ndef.get(tag);
+
+        if (walletAddress.isEmpty()) {
+            walletAddress = SharedPreferencesManager.getReceiveAddress(MainActivity.this);
+        }
+
+        String tag_string = walletAddress + "-" + billAmount;
+        System.out.println("KUKUKUK \n\n kukuk \n\n " + tag_string + "\n\nkukukkuk\n\n");
+        NdefMessage message = buildNdefMessage(tag_string);
+        try {
+            ndefMessage.connect();
+            ndefMessage.writeNdefMessage(message);
+            ndefMessage.close();
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        //    NdefMessage[] messages = getNdefMessages(intent);
+    //    System.out.println(displayByteArray(messages[0].toByteArray()));
+
+    }
+
+    private NdefMessage buildNdefMessage(String data) {
+        // create a new NDEF record and containing NDEF message using the app's custom MIME type:
+        String mimeType = "application/com.breadwallet";
+
+        byte[] mimeBytes = mimeType.getBytes(Charset.forName("UTF-8"));
+        byte[] dataBytes = data.getBytes(Charset.forName("UTF-8"));
+        byte[] id = new byte[0];
+
+        NdefRecord record = new NdefRecord(NdefRecord.TNF_MIME_MEDIA, mimeBytes, id, dataBytes);
+        NdefMessage message = new NdefMessage(new NdefRecord[] { record });
+
+        // return the NDEF message
+        return message;
     }
 
     private void setListeners() {
@@ -394,6 +461,9 @@ public class MainActivity extends FragmentActivity implements Observer {
         }, 4000);
         BRWalletManager.refreshAddress();
         checkUnlockedTooLong();
+
+        mNfcAdapter.enableForegroundDispatch(this, mPendingIntent, null, null);
+     //   mNfcAdapter.setNdefPushMessageCallback(this, this);
     }
 
     @Override
@@ -441,8 +511,10 @@ public class MainActivity extends FragmentActivity implements Observer {
         syncProgressBar = (ProgressBar) findViewById(R.id.sync_progress_bar);
         syncProgressText = (TextView) findViewById(R.id.sync_progress_text);
         pageIndicatorRight = (ImageView) findViewById(R.id.circle_indicator_right);
+        pageIndicatorCashier = (ImageView) findViewById(R.id.circle_indicator_cashier);
         pageIndicatorLeft.setImageResource(R.drawable.circle_indicator);
         pageIndicatorRight.setImageResource(R.drawable.circle_indicator);
+        pageIndicatorCashier.setImageResource(R.drawable.circle_indicator);
         CustomPagerAdapter pagerAdapter = new CustomPagerAdapter(getFragmentManager());
         burgerButtonMap = new HashMap<>();
         parallaxViewPager = ((ParallaxViewPager) findViewById(R.id.main_viewpager));
@@ -525,9 +597,15 @@ public class MainActivity extends FragmentActivity implements Observer {
         if (x == 0) {
             BRAnimator.scaleView(pageIndicatorLeft, 1f, BRConstants.PAGE_INDICATOR_SCALE_UP, 1f, BRConstants.PAGE_INDICATOR_SCALE_UP);
             BRAnimator.scaleView(pageIndicatorRight, BRConstants.PAGE_INDICATOR_SCALE_UP, 1f, BRConstants.PAGE_INDICATOR_SCALE_UP, 1f);
+            BRAnimator.scaleView(pageIndicatorCashier, BRConstants.PAGE_INDICATOR_SCALE_UP, 1f, BRConstants.PAGE_INDICATOR_SCALE_UP, 1f);
         } else if (x == 1) {
             BRAnimator.scaleView(pageIndicatorRight, 1f, BRConstants.PAGE_INDICATOR_SCALE_UP, 1f, BRConstants.PAGE_INDICATOR_SCALE_UP);
             BRAnimator.scaleView(pageIndicatorLeft, BRConstants.PAGE_INDICATOR_SCALE_UP, 1f, BRConstants.PAGE_INDICATOR_SCALE_UP, 1f);
+            BRAnimator.scaleView(pageIndicatorCashier, BRConstants.PAGE_INDICATOR_SCALE_UP, 1f, BRConstants.PAGE_INDICATOR_SCALE_UP, 1f);
+        } else if (x == 2) {
+            BRAnimator.scaleView(pageIndicatorCashier, 1f, BRConstants.PAGE_INDICATOR_SCALE_UP, 1f, BRConstants.PAGE_INDICATOR_SCALE_UP);
+            BRAnimator.scaleView(pageIndicatorLeft, BRConstants.PAGE_INDICATOR_SCALE_UP, 1f, BRConstants.PAGE_INDICATOR_SCALE_UP, 1f);
+            BRAnimator.scaleView(pageIndicatorRight, BRConstants.PAGE_INDICATOR_SCALE_UP, 1f, BRConstants.PAGE_INDICATOR_SCALE_UP, 1f);
         } else {
             Log.e(TAG, "Something went wrong setting the circle pageIndicator");
         }
@@ -755,6 +833,76 @@ public class MainActivity extends FragmentActivity implements Observer {
         if (syncProgressBar == null || syncProgressText == null) return;
         syncProgressBar.setProgress(progress);
         syncProgressText.setText(progressText);
+    }
+
+    public void createBill(View view) {
+        // Do something in response to button click
+        System.out.println("You pressed the button, bitch");
+        LinearLayout bitch = (LinearLayout) view.getParent().getParent();
+        RelativeLayout bitch2 = (RelativeLayout) bitch.getChildAt(1);
+        EditText bitch3 = (EditText) bitch2.getChildAt(2);
+        System.out.println("FUCK IT " + bitch3.getText());
+
+        billAmount = bitch3.getText().toString();
+        billAmount = "" + (int) (Double.parseDouble(billAmount)*100.00);
+
+
+        NfcAdapter mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
+
+/*
+
+        if (mNfcAdapter == null){
+            System.out.println("Your device does not support NFC. Cannot run demo.");
+            return;
+        }
+
+        PendingIntent mNfcPendingIntent = PendingIntent.getActivity(this, 0, new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
+
+        IntentFilter tagDetected = new IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED);
+
+         create IntentFilter arrays:
+        IntentFilter[] mWriteTagFilters = new IntentFilter[] { tagDetected };
+
+*/
+    }
+
+    private static NdefMessage getTestMessage() {
+        byte[] mimeBytes = "application/com.android.cts.verifier.nfc"
+                .getBytes(Charset.forName("US-ASCII"));
+        byte[] id = new byte[] {1, 3, 3, 7};
+        byte[] payload = "CTS Verifier NDEF Push Tag".getBytes(Charset.forName("US-ASCII"));
+        return new NdefMessage(new NdefRecord[] {
+                new NdefRecord(NdefRecord.TNF_MIME_MEDIA, mimeBytes, id, payload)
+        });
+    }
+
+    // sending message
+
+    public NdefMessage createNdefMessage(NfcEvent event) {
+        return getTestMessage();
+    }
+
+
+    private NdefMessage[] getNdefMessages(Intent intent) {
+        Parcelable[] rawMessages = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
+        if (rawMessages != null) {
+            NdefMessage[] messages = new NdefMessage[rawMessages.length];
+            for (int i = 0; i < messages.length; i++) {
+                messages[i] = (NdefMessage) rawMessages[i];
+            }
+            return messages;
+        } else {
+            return null;
+        }
+    }
+
+    static String displayByteArray(byte[] bytes) {
+        String res="";
+        StringBuilder builder = new StringBuilder().append("[");
+        for (int i = 0; i < bytes.length; i++) {
+            res+=(char)bytes[i];
+        }
+        return res;
     }
 
 }

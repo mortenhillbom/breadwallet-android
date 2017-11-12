@@ -8,7 +8,7 @@
     android:descendantFocusability="beforeDescendants"
     android:filterTouchesWhenObscured="true"
     android:focusableInTouchMode="true"
-    tools:context="com.breadwallet.presenter.activities.MainActivity">
+    tools:context="com.breadwallet.presenter.activities.MainActivity" >
 
     <com.breadwallet.tools.adapter.ParallaxViewPager xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/main_viewpager"
@@ -159,7 +159,7 @@
 
     <RelativeLayout
         android:id="@+id/main_pager_indicator"
-        android:layout_width="60dp"
+        android:layout_width="90dp"
         android:layout_height="30dp"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
@@ -185,6 +185,21 @@
             android:id="@+id/circle_indicator_right"
             android:layout_width="11dp"
             android:layout_height="11dp"
+            android:layout_alignParentEnd="false"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginEnd="18dp"
+            android:filterTouchesWhenObscured="true"
+            android:paddingBottom="@dimen/pager_indicator_shadow_padding"
+            android:paddingLeft="@dimen/pager_indicator_shadow_padding"
+            android:paddingRight="@dimen/pager_indicator_shadow_padding"
+            android:paddingTop="0dp"
+            android:src="@drawable/circle_indicator" />
+
+        <ImageView
+            android:id="@+id/circle_indicator_cashier"
+            android:layout_width="11dp"
+            android:layout_height="11dp"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
             android:layout_marginEnd="18dp"
@@ -194,6 +209,7 @@
             android:paddingRight="@dimen/pager_indicator_shadow_padding"
             android:paddingTop="0dp"
             android:src="@drawable/circle_indicator" />
+
     </RelativeLayout>
 
 

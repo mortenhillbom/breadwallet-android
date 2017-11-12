@@ -193,6 +193,10 @@
     <!-- checked -->
     <string name="receive_money">receive money:</string>
     <!-- checked -->
+    <string name="create_bill">create bill:</string>
+    <!-- checked -->
+    <string name="button_create_bill">Confirm</string>
+    <!-- checked -->
     <string name="send_money">send money:</string>
     <!-- checked -->
     <string name="new_wallet">new wallet</string>

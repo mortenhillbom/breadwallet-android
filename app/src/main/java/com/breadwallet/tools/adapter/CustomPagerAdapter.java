@@ -13,6 +13,7 @@ import android.view.animation.TranslateAnimation;
 import com.breadwallet.presenter.activities.MainActivity;
 import com.breadwallet.presenter.fragments.MainFragment;
 import com.breadwallet.presenter.fragments.MainFragmentQR;
+import com.breadwallet.presenter.fragments.MainFragmentCashier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,10 +47,12 @@ public class CustomPagerAdapter extends FragmentPagerAdapter {
     private static final String TAG = CustomPagerAdapter.class.getName();
     public final MainFragment mainFragment;
     public final MainFragmentQR mainFragmentQR;
+    public final MainFragmentCashier mainFragmentCashier;
     private final List<Fragment> fragments;
     private final int ANIM_DURATION = 150;
     private View main;
     private View mainQR;
+    private View mainCashier;
     public static CustomPagerAdapter adapter;
 
     public CustomPagerAdapter(FragmentManager fragmentManager) {
@@ -58,8 +61,10 @@ public class CustomPagerAdapter extends FragmentPagerAdapter {
         this.fragments = new ArrayList<>();
         mainFragment = new MainFragment();
         mainFragmentQR = new MainFragmentQR();
+        mainFragmentCashier = new MainFragmentCashier();
         fragments.add(mainFragment);
         fragments.add(mainFragmentQR);
+        fragments.add(mainFragmentCashier);
         adapter = this;
 
     }
@@ -85,6 +90,7 @@ public class CustomPagerAdapter extends FragmentPagerAdapter {
         if (app == null) return;
         if (main == null) main = mainFragment.getView();
         if (mainQR == null) mainQR = mainFragmentQR.getView();
+        if (mainCashier == null) mainCashier = mainFragmentCashier.getView();
         if (b) {
             new Handler().post(new Runnable() {
 
@@ -101,6 +107,7 @@ public class CustomPagerAdapter extends FragmentPagerAdapter {
                         public void onAnimationEnd(Animation animation) {
                             if (main != null) main.setVisibility(View.VISIBLE);
                             if (mainQR != null) mainQR.setVisibility(View.VISIBLE);
+                            if (mainCashier != null) mainCashier.setVisibility(View.VISIBLE);
                         }
 
                         @Override
@@ -119,6 +126,9 @@ public class CustomPagerAdapter extends FragmentPagerAdapter {
                     }
                     if (mainQR != null) {
                         mainQR.startAnimation(set);
+                    }
+                    if (mainCashier != null) {
+                        mainCashier.startAnimation(set);
                     }
                     app.pageIndicator.setVisibility(View.VISIBLE);
                     if (MiddleViewAdapter.getSyncing()) {
@@ -145,6 +155,7 @@ public class CustomPagerAdapter extends FragmentPagerAdapter {
                         public void onAnimationEnd(Animation animation) {
                             if (main != null) main.setVisibility(View.GONE);
                             if (mainQR != null) mainQR.setVisibility(View.GONE);
+                            if (mainCashier != null) mainCashier.setVisibility(View.GONE);
                         }
 
                         @Override
@@ -162,6 +173,9 @@ public class CustomPagerAdapter extends FragmentPagerAdapter {
                     }
                     if (mainQR != null) {
                         mainQR.startAnimation(set);
+                    }
+                    if (mainCashier != null) {
+                        mainCashier.startAnimation(set);
                     }
                     app.pageIndicator.setVisibility(View.GONE);
                     app.showHideSyncProgressViews(false);
