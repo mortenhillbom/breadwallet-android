@@ -43,6 +43,8 @@ import android.os.Parcelable;
 import java.nio.charset.Charset;
 
 import android.app.Fragment;
+import android.widget.Toast;
+import android.content.Context;
 
 import com.breadwallet.R;
 import com.breadwallet.BreadWalletApp;
@@ -224,6 +226,12 @@ public class MainActivity extends FragmentActivity implements Observer {
         super.onNewIntent(intent);
         setUrlHandler(intent);
 
+        Context context = getApplicationContext();
+        CharSequence text = "Writing started";
+        int duration = Toast.LENGTH_SHORT;
+
+        Toast.makeText(context, text, duration).show();
+
         Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
 
         Ndef ndefMessage = Ndef.get(tag);
@@ -239,6 +247,9 @@ public class MainActivity extends FragmentActivity implements Observer {
             ndefMessage.connect();
             ndefMessage.writeNdefMessage(message);
             ndefMessage.close();
+
+            text = "Writing completed";
+            Toast.makeText(context, text, duration).show();
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
