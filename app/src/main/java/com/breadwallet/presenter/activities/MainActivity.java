@@ -146,7 +146,9 @@ public class MainActivity extends FragmentActivity implements Observer {
     public BubbleTextView sendBubble2;
     private ToastUpdater toastUpdater;
 
-    public static String billAmount = "100";
+    public static String billAmount = "4500";
+    public static String productName = "Cool haircut";
+    public static String businessName = "Harry The Hairdresser";
     public static String walletAddress = "";
 
     public static boolean appInBackground = false;
@@ -240,8 +242,7 @@ public class MainActivity extends FragmentActivity implements Observer {
             walletAddress = SharedPreferencesManager.getReceiveAddress(MainActivity.this);
         }
 
-        String tag_string = walletAddress + "-" + billAmount;
-        System.out.println("KUKUKUK \n\n kukuk \n\n " + tag_string + "\n\nkukukkuk\n\n");
+        String tag_string = walletAddress + "-" + billAmount + "-" + businessName + "-" + productName;
         NdefMessage message = buildNdefMessage(tag_string);
         try {
             ndefMessage.connect();
@@ -851,8 +852,16 @@ public class MainActivity extends FragmentActivity implements Observer {
         System.out.println("You pressed the button, bitch");
         LinearLayout bitch = (LinearLayout) view.getParent().getParent();
         RelativeLayout bitch2 = (RelativeLayout) bitch.getChildAt(1);
-        EditText bitch3 = (EditText) bitch2.getChildAt(2);
+        EditText bitch3 = (EditText) bitch2.getChildAt(4);
         System.out.println("FUCK IT " + bitch3.getText());
+
+        EditText bitch4 = (EditText) bitch2.getChildAt(2);
+
+        productName = bitch4.getText().toString();
+
+        EditText bitch5 = (EditText) bitch2.getChildAt(1);
+
+        businessName = bitch5.getText().toString();
 
         billAmount = bitch3.getText().toString();
         billAmount = "" + (int) (Double.parseDouble(billAmount)*100.00);
