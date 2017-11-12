@@ -37,7 +37,7 @@
         android:padding="10dp"
         android:text="@string/copy_address_to_clipboard"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="@color/dark_blue"
+        android:textColor="@color/gray"
         android:textSize="16sp" />
 
     <RelativeLayout
@@ -59,7 +59,7 @@
         android:padding="10dp"
         android:text="@string/send_address_as_message"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="@color/dark_blue"
+        android:textColor="@color/gray"
         android:textSize="16sp" />
 
     <RelativeLayout
@@ -81,7 +81,7 @@
         android:padding="10dp"
         android:text="@string/send_address_as_email"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="@color/dark_blue"
+        android:textColor="@color/gray"
         android:textSize="16sp" />
 
     <RelativeLayout
@@ -103,7 +103,7 @@
         android:padding="10dp"
         android:text="@string/request_an_amount"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="@color/dark_blue"
+        android:textColor="@color/gray"
         android:textSize="16sp" />
 
     <RelativeLayout

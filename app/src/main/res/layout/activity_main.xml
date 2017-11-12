@@ -26,10 +26,11 @@
         android:filterTouchesWhenObscured="true">
 
         <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:id="@+id/logo_middle_top"
+            android:layout_width="180dp"
+            android:layout_height="50dp"
             android:layout_gravity="center"
-            android:background="@drawable/breadwalletupcentered"
+            android:background="@drawable/bizpay_logo"
             android:filterTouchesWhenObscured="true"
             android:textAlignment="center" />
 
@@ -59,7 +60,7 @@
         android:id="@+id/sync_progress_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/sync_progress_bar"
+        android:layout_below="@+id/sync_progress_bar"
         android:layout_marginBottom="15dp"
         android:layout_marginStart="20dp"
         android:layout_toEndOf="@+id/middle_view_flipper"
